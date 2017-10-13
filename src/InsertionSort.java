@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdIn;
 
 public class InsertionSort {
 	public static void sort(Comparable[] a) {
@@ -32,10 +33,22 @@ public class InsertionSort {
 	}
 	
 	public static void main(String[] args) {
-		// read strings from standard input, sort them, and print
-		String[] a = In.readStrings();
-		sort(a);
-		assert isSorted(a);
-		show(a);
+		if (args.length > 0) {
+			// read strings from standard input, sort them, and print
+			String[] a = StdIn.readAllStrings();
+			sort(a);
+			assert isSorted(a);
+			show(a);
+		} else {
+			// generate random number array with double type
+			int N = 100;
+			Double[] a = new Double[N];
+			for (int i = 0; i < N; i++)
+				a[i] = StdRandom.uniform();
+			sort(a);
+			assert isSorted(a);
+			show(a);
+		}
 	}
 }
+

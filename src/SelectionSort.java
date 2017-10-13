@@ -1,5 +1,5 @@
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
 
 public class SelectionSort {
 	public static void sort(Comparable[] a) {
@@ -36,7 +36,7 @@ public class SelectionSort {
 	
 	public static void main(String[] args) {
 		// read strings from standard input, sort them, and print
-		String[] a = In.readStrings();
+		String[] a = StdIn.readAllStrings();
 		sort(a);
 		assert isSorted(a);
 		show(a);

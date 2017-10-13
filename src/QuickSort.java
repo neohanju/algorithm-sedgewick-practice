@@ -2,34 +2,30 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 
-public class MergeSort {
-	
-	private static Comparable[] aux;	// auxiliary array for merge operation
+public class QuickSort {
 	
 	public static void sort(Comparable[] a) {
-		aux = new Comparable[a.length];
+		StdRandom.shuffle(a); 	// eliminate dependency on input
 		sort(a, 0, a.length-1);
 	}
 	
 	public static void sort(Comparable[] a, int lo, int hi) {
 		if (hi <= lo) return;
-		int mid = lo + (hi - lo)/2;
-		sort(a, lo, mid);		// sort left half
-		sort(a, mid+1, hi);		// sort right half
-		merge(a, lo, mid, hi);	// merge results
+		int j = partition(a, lo, hi);
+		sort(a, lo, j-1);
+		sort(a, j+1, hi);
 	}
 	
-	public static void merge(Comparable[] a, int lo, int mid, int hi) {
-		int i = lo, j = mid + 1;
-		
-		for (int k = lo; k <= hi; k++)
-			aux[k] = a[k];
-		
-		for (int k = lo; k <= hi; k++)
-			if (i > mid)					a[k] = a[j++];
-			else if (j > hi)				a[k] = a[i++];
-			else if (less(aux[j], aux[i]))	a[k] = a[j++];
-			else 							a[k] = a[i++];
+	public static int partition(Comparable[] a, int lo, int hi) {
+		int i = lo, j = hi+1;
+		while (true) {
+			while (less(a[++i], a[lo])) if (i == hi) break;
+			while (less(a[lo], a[--j])) if (j == lo) break;
+			if (j <= i) break;
+			exch(a, i, j);
+		}
+		exch(a, lo, j);
+		return j;
 	}
 	
 	private static boolean less(Comparable v, Comparable w) {
@@ -73,3 +69,4 @@ public class MergeSort {
 		}
 	}
 }
+

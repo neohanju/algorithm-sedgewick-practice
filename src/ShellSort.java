@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 public class ShellSort {
@@ -38,7 +39,7 @@ public class ShellSort {
 	
 	public static void main(String[] args) {
 		// read strings from standard input, sort them, and print
-		String[] a = In.readStrings();
+		String[] a = StdIn.readAllStrings();
 		sort(a);
 		assert isSorted(a);
 		show(a);
