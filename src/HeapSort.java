@@ -4,6 +4,8 @@ import edu.princeton.cs.algs4.StdRandom;
 
 public class HeapSort {
 	public static void sort(Comparable[] a) {
+		// maybe we have to modify 'exch' and 'less' with index accessing part to avoid out of bound error.
+		// but it seems quite boring and unclean to read a code.
 		int N = a.length;
 		for (int i = N/2; i >= 1; i--)
 			sink(a, i, N);
