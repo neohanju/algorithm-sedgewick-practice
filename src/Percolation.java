@@ -5,26 +5,36 @@
  *  'Algorithm' in Coursera. All indices starts from 1 to N
  */
 
-import algs4.QuickFindUF;
-import algs4.StdOut;
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
 
 public class Percolation {	
 	
-	private int N;                // column size of grid
-	private boolean[][] grid;     // grid of sites
-	private int numOpened;        // # of opened sites
-	private QuickFindUF UFModule; // union-find module for connection check
+	private int N;                  // column size of grid
+	private boolean[][] grid;       // grid of sites
+	private int numOpened;          // # of opened sites
+	private WeightedQuickUnionUF UFModule; 
+	                                // union-find module for connection check
 	
-	private int SOURCE_SITE_INDEX;
-	private int SINK_SITE_INDEX;
+	private int SOURCE_SITE_INDEX;  // auxiliary index for source site
+	private int SINK_SITE_INDEX;    // auxiliary index for sink site
+	private static int [][] NEIGHBOR_OFFSETS = 
+		{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};  // offsets for accessing neighbors
 	
 	//--------------------------------------------------------
 	// API
 	//--------------------------------------------------------
 	public Percolation(int n) {
-		// create n-by-n grid, with all sites blocked
+		/**
+		 * Create n-by-n grid, with all sites blocked.
+		 * 
+		 * @param  n  size of grid. the grid will be N x N
+		 * @return    none
+		 */
 		if (n <= 0)
-			throw new IllegalArgumentException("Invalid grid size! the size must be a positive number.");
+			throw new IllegalArgumentException(
+					"Invalid grid size! the size must be a positive number.");
 		
 		this.numOpened = 0;
 		this.N = n;
@@ -33,50 +43,56 @@ public class Percolation {
 			for (int j = 0; j < N; j++)
 				this.grid[i][j] = false;
 		
-		UFModule = new QuickFindUF(N*N+2);
+		UFModule = new WeightedQuickUnionUF(N*N+2);
 		SOURCE_SITE_INDEX = N*N;
 		SINK_SITE_INDEX = N*N + 1;
 	}
 	
 	public void open(int row, int col) {
 		/**
-		 * Open the sites. It also connects the opened site with its neighbor
-		 * sites when they are opened. Then, when the target site is at a top
-		 * or bottom column, connect the site with source or sink site.
+		 * Open site (row, col) if it is not open already. It also connects 
+		 * the opened site with its neighbor sites when they are opened. 
+		 * When the target site is at a top/bottom column, connect the site 
+		 * with a source/sink site.
 		 * 
-		 * @param  row  row index of a target site
-		 * @param  col  column index of a target site
+		 * @param  row  row index of a target site. valid at [1..N]
+		 * @param  col  column index of a target site. valid at [1..N]
 		 * @return      none
 		 */
-		isValidIndex(row, col);		
-		if (!isOpen(row, col)) {
-			this.grid[row][col] = true;
-			this.numOpened++;
-			
-			// union with opened neighbor sites
-			if (isValidIndex(row-1, col)) this.connect(row, col, row-1, col);
-			if (isValidIndex(row+1, col)) this.connect(row, col, row+1, col);
-			if (isValidIndex(row, col-1)) this.connect(row, col, row, col-1);
-			if (isValidIndex(row, col+1)) this.connect(row, col, row, col+1);
-			
-			// union with source or sink (auxiliary) site
-			int idx = this.xyTo1D(row, col);
-			if      (0   == row) this.UFModule.union(SOURCE_SITE_INDEX, idx);
-			else if (N-1 == row) this.UFModule.union(idx, SINK_SITE_INDEX);
+		checkIndex(row, col);		
+		if (isOpen(row, col))
+			return;
+
+		this.grid[row-1][col-1] = true;
+		this.numOpened++;
+		
+		// union with opened neighbor sites
+		int neighborRow = 0, neighborCol = 0;
+		for (int i = 0; i < NEIGHBOR_OFFSETS.length; i++) {
+			neighborRow = row + NEIGHBOR_OFFSETS[i][0];
+			neighborCol = col + NEIGHBOR_OFFSETS[i][1];
+			if (neighborRow < 1 || neighborRow > N 
+					|| neighborCol < 1 || neighborCol > N)
+				continue;
+			if (this.isOpen(neighborRow, neighborCol))
+				this.connect(row, col, neighborRow, neighborCol);
 		}
+		
+		// union with source or sink (auxiliary) site
+		int idx = this.xyTo1D(row, col);
+		if (1 == row) this.UFModule.union(SOURCE_SITE_INDEX, idx);
+		if (N == row) this.UFModule.union(idx, SINK_SITE_INDEX);
 	}
 	
 	public boolean isOpen(int row, int col) {
-		isValidIndex(row, col);
-		return this.grid[row][col];
+		checkIndex(row, col);
+		return this.grid[row-1][col-1];
 	} 
 	
 	public boolean isFull(int row, int col) {
 		// is site (row, col) full?
-		isValidIndex(row, col);
-		int idx = xyTo1D(row, col);
-		return UFModule.connected(SOURCE_SITE_INDEX, idx) 
-				&& UFModule.connected(idx, SINK_SITE_INDEX);
+		checkIndex(row, col);
+		return UFModule.connected(SOURCE_SITE_INDEX, xyTo1D(row, col));
 	}
 	
 	public int numberOfOpenSites() {
@@ -96,19 +112,18 @@ public class Percolation {
 		// valid row in [1..N] and col in [1..N]
 		return N*(row-1) + col-1;
 	}
-	
-	private boolean isValidIndex(int row, int col) {
+		
+	private void checkIndex(int row, int col) {
 		if (row < 1 || row > N) {
 			throw new IndexOutOfBoundsException("row index out of bounds");			
 		} else if (col < 1 || col > N) {
 			throw new IndexOutOfBoundsException("col index out of bounds");
 		}
-		return true;
-	}
+	} 
 	
 	private void connect(int row1, int col1, int row2, int col2) {
 		/**
-		 * Connect the sites.
+		 * Connect two sites.
 		 * 
 		 * @param  row1  row index of the first site
 		 * @param  col1  column index of the first site
@@ -116,29 +131,48 @@ public class Percolation {
 		 * @param  col2  column index of the second site
 		 * @return       none
 		 */
-		int idx1 = xyTo1D(row1, col1), idx2 = xyTo1D(row2, col2);
-		if (this.UFModule.connected(idx1, idx2))
-			return;
-		this.UFModule.union(idx1, idx2);
+		this.UFModule.union(xyTo1D(row1, col1), xyTo1D(row2, col2));
 	}
+	
 	
 	//--------------------------------------------------------
 	// dummy client code
 	//--------------------------------------------------------
 	public static void main(String[] args) {
-		// test client (optional)
-		int N = 20;
+		/**
+		 * test client (optional)
+		 * 
+		 * @param  args  arguments. [input file path, (test row), (test col)]
+		 * @return none
+		 */
+		
+		// test with file input
+		In in = new In(args[0]);
+		int[] whilelist = in.readAllInts();
+		int N = whilelist[0];
+		StdOut.println("Size: " + N);
+		
 		Percolation pc = new Percolation(N);
-		for (int i = 0; i < N-1; i++) {
-			pc.open(i, 0);
+		for (int i = 1; i < whilelist.length; i+=2) {
+			int row = whilelist[i];
+			int col = whilelist[i+1];
+			StdOut.println("Open [" + row + ", " + col + "]");
+			pc.open(row, col);
 		}
-		pc.open(N-2, 1);
-		pc.open(N-1, 1);
-		StdOut.print("Is full? " + pc.isFull(N-1, 1) + "\n");
-		StdOut.print("Percolated? " + pc.percolates());
+		StdOut.println("Percolated? " + pc.percolates());
+				
+		// check a specific site
+		if (args.length < 3)
+			return;
+		
+		int testRow = Integer.parseInt(args[1]), testCol = Integer.parseInt(args[2]);
+		StdOut.println("[" + testRow + ", " + testCol + "] is opened? " + pc.isOpen(testRow, testCol));
+		StdOut.println("[" + testRow + ", " + testCol + "] is full? " + pc.isFull(testRow, testCol));
 	}
 }
 
 //()()
 //('')HAANJU.YOO
+// javac -cp ".;..\lib\algs4.jar" Percolation.java
+// java -cp ".;..\lib\algs4.jar" Percolation ..\etc\percolation-testing\input50.txt
 
