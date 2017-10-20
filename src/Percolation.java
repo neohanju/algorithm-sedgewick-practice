@@ -1,5 +1,4 @@
 
-
 import edu.princeton.cs.algs4.QuickFindUF;
 import edu.princeton.cs.algs4.StdOut;
 
@@ -14,7 +13,7 @@ public class Percolation {
 	public Percolation(int n) {
 		// create n-by-n grid, with all sites blocked
 		if (n <= 0)
-			throw new IllegalArgumentException("the size of grid must be greater than 0");
+			throw new IllegalArgumentException("Invalid grid size! the size must be a positive number.");
 		
 		this.num_open_site = 0;
 		this.N = n;
@@ -26,9 +25,8 @@ public class Percolation {
 		UFModule = new QuickFindUF(N*N+2);
 	}
 	
-	public void open(int row, int col) {		
-		if (!inBound(row, col))
-			throw new IllegalArgumentException("tried to access the element at the out of bound");
+	public void open(int row, int col) {
+		checkBoundException(row, col);	
 		
 		if (!isOpen(row, col)) {
 			this.grid[row][col] = true;
@@ -51,15 +49,13 @@ public class Percolation {
 	}
 	
 	public boolean isOpen(int row, int col) {
-		if (!inBound(row, col))
-			throw new IllegalArgumentException("tried to access the element at the out of bound");
+		checkBoundException(row, col);
 		return this.grid[row][col];
 	} 
 	
 	public boolean isFull(int row, int col) {
 		// is site (row, col) full?
-		if (!inBound(row, col))
-			throw new IllegalArgumentException("tried to access the element at the out of bound");
+		checkBoundException(row, col);
 		return UFModule.connected(idx2Dto1D(row, col), UFModule.count()-1);
 	}
 	
@@ -78,9 +74,17 @@ public class Percolation {
 		return row * N + col + 1;
 	}
 	
-	private boolean inBound(int row, int col) {
+	private boolean inBound(int row, int col) {		
 		if (row < 0 || row >= N || col < 0 || col >= N) return false;
 		return true;
+	}
+	
+	private void checkBoundException(int row, int col) {		
+		if (row < 0 || row >= N) {
+			throw new IndexOutOfBoundsException("row index out of bounds");			
+		} else if (col < 0 || col >= N) {
+			throw new IndexOutOfBoundsException("col index out of bounds");
+		}		
 	}
 	
 	public static void main(String[] args) {
