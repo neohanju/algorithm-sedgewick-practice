@@ -2,7 +2,7 @@
  * Author : Haanju Yoo
  * Date   : 2017.10.20
  *  Percolation data abstraction for the first programming assignment of 
- *  'Algorithm' in Coursera. All indices starts from 1 to N
+ *  'Algorithm' in Coursera. All indices start from 1.
  */
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
@@ -11,14 +11,14 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Percolation {	
 	
-	private int N;                  // column size of grid
-	private boolean[][] grid;       // grid of sites
-	private int numOpened;          // # of opened sites
+	private int N;  // column size of grid
+	private boolean[][] grid;  // grid of sites
+	private int numOpened;  // # of opened sites
 	private WeightedQuickUnionUF UFModule; 
-	                                // union-find module for connection check
+	                        // union-find module for connection check
 	
 	private int SOURCE_SITE_INDEX;  // auxiliary index for source site
-	private int SINK_SITE_INDEX;    // auxiliary index for sink site
+	private int SINK_SITE_INDEX;  // auxiliary index for sink site
 	private static int [][] NEIGHBOR_OFFSETS = 
 		{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};  // offsets for accessing neighbors
 	
@@ -29,8 +29,8 @@ public class Percolation {
 		/**
 		 * Create n-by-n grid, with all sites blocked.
 		 * 
-		 * @param  n  size of grid. the grid will be N x N
-		 * @return    none
+		 * @param   n     size of grid. the grid will be N x N
+		 * @return  none
 		 */
 		if (n <= 0)
 			throw new IllegalArgumentException(
@@ -57,7 +57,7 @@ public class Percolation {
 		 * 
 		 * @param  row  row index of a target site. valid at [1..N]
 		 * @param  col  column index of a target site. valid at [1..N]
-		 * @return      none
+		 * @return none
 		 */
 		checkIndex(row, col);		
 		if (isOpen(row, col))
@@ -85,18 +85,35 @@ public class Percolation {
 	}
 	
 	public boolean isOpen(int row, int col) {
+		/**
+		 * Examine whether the target site is opened or not
+		 * 
+		 * @param  row      row index of the target site
+		 * @param  col      column index of the target site
+		 * @return boolean  true: target site is opened / false: not opened
+		 */
 		checkIndex(row, col);
 		return this.grid[row-1][col-1];
 	} 
 	
 	public boolean isFull(int row, int col) {
-		// is site (row, col) full?
+		/**
+		 * Examine whether the target site is full or not
+		 * 
+		 * @param  row      row index of the target site
+		 * @param  col      column index of the target site
+		 * @return boolean  true: target site is full / false: not full
+		 */
 		checkIndex(row, col);
 		return UFModule.connected(SOURCE_SITE_INDEX, xyTo1D(row, col));
 	}
 	
 	public int numberOfOpenSites() {
-		// number of open sites
+		/**
+		 * Return the number of open sites
+		 * 
+		 * @return  int  the number of open sites
+		 */
 		return this.numOpened;
 	}
 	
@@ -109,11 +126,25 @@ public class Percolation {
 	// private methods
 	//--------------------------------------------------------
 	private int xyTo1D(int row, int col) {
-		// valid row in [1..N] and col in [1..N]
+		/**
+		 * Return 1D array index from 2D coordinates.
+		 * 
+		 * @param   row   row index of the target site
+		 * @param   col   column index of the target site
+		 * @return  int   1D array index
+		 */
 		return N*(row-1) + col-1;
 	}
 		
 	private void checkIndex(int row, int col) {
+		/**
+		 * Check the validity of the target index. Valid row in [1..N] and 
+		 * col in [1..N]
+		 * 
+		 * @param   row   row index of the target site
+		 * @param   col   column index of the target site
+		 * @return  int   1D array index
+		 */
 		if (row < 1 || row > N) {
 			throw new IndexOutOfBoundsException("row index out of bounds");			
 		} else if (col < 1 || col > N) {
@@ -125,11 +156,11 @@ public class Percolation {
 		/**
 		 * Connect two sites.
 		 * 
-		 * @param  row1  row index of the first site
-		 * @param  col1  column index of the first site
-		 * @param  row2  row index of the second site
-		 * @param  col2  column index of the second site
-		 * @return       none
+		 * @param   row1   row index of the first site
+		 * @param   col1   column index of the first site
+		 * @param   row2   row index of the second site
+		 * @param   col2   column index of the second site
+		 * @return  none
 		 */
 		this.UFModule.union(xyTo1D(row1, col1), xyTo1D(row2, col2));
 	}

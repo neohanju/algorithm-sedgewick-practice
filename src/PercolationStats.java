@@ -10,14 +10,14 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {	
 	
-	private double[] pcThresholds;
-	private int T;
+	private double[] pcThresholds;  // to record thresholds
+	private int T;  // number of experiments (i.e. # of trials)
 	
 	public PercolationStats(int n, int trials) {
 		/**
 		 * perform trials independent experiments on an n-by-n grid
 		 * 
-		 * @param  n       size of percolation (n >= 0)
+		 * @param  n       size of system (n >= 0)
 		 * @param  trials  total number of experiments (trials >= 0)
 		 * @return none
 		 */
@@ -28,12 +28,10 @@ public class PercolationStats {
 		
 		T = trials;
 		pcThresholds = new double [T];
-		double numSites = n*n;		
+		double numSites = n*n;
 		for (int i = 0; i < T; i++) {			
 			Percolation curPc = new Percolation(n);			
 			while (!curPc.percolates()) {
-				// TODO: pick a numbers at uniform distribution and skip
-				// when the picked site is not blocked
 				int row = StdRandom.uniform(n) + 1;
 				int col = StdRandom.uniform(n) + 1;
 				curPc.open(row, col);
@@ -51,7 +49,7 @@ public class PercolationStats {
 	
 	public double stddev() {
 		/**
-		 * @return sample standard deviation of percolation threshold
+		 * @return   double   sample standard deviation of percolation threshold
 		 */
 		if (T > 1)
 			return StdStats.stddev(pcThresholds);
@@ -61,20 +59,24 @@ public class PercolationStats {
 	
 	public double confidenceLo() {
 		/**
-		 * @return low  endpoint of 95% confidence intervals
+		 * @return   double   low end point of 95% confidence intervals
 		 */
 		return this.mean() - 1.96 * this.stddev() / Math.sqrt(T);
 	}
 	
 	public double confidenceHi() {
 		/**
-		 * @return high endpoint of 95% confidence interval
+		 * @return   double   high end point of 95% confidence interval
 		 */
 		return this.mean() + 1.96 * this.stddev() / Math.sqrt(T);
 	}
 
 	public static void main(String[] args) {
-		// test client (described below)
+		/**
+		 * test client.
+		 * @param  args[]  [0]: size of system, [1]: # of trials
+		 * @return none  
+		 */
 		if (args.length < 2)
 			throw new IllegalArgumentException("Insufficient number of args");
 		
