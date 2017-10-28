@@ -11,14 +11,16 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Percolation {	
 	
-	private int N;  // column size of grid
+	private final int N;  // column size of grid
 	private boolean[][] grid;  // grid of sites
 	private int numOpened;  // # of opened sites
-	private WeightedQuickUnionUF UFModule; 
+	private WeightedQuickUnionUF UFMPercol; 
 	                        // union-find module for connection check
+	private WeightedQuickUnionUF UFMFull;
+                            // union-find module for full check
 	
-	private int SOURCE_SITE_INDEX;  // auxiliary index for source site
-	private int SINK_SITE_INDEX;  // auxiliary index for sink site
+	private final int SOURCE_SITE_INDEX;  // auxiliary index for source site
+	private final int SINK_SITE_INDEX;  // auxiliary index for sink site
 	private static int [][] NEIGHBOR_OFFSETS = 
 		{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};  // offsets for accessing neighbors
 	
@@ -43,7 +45,8 @@ public class Percolation {
 			for (int j = 0; j < N; j++)
 				this.grid[i][j] = false;
 		
-		UFModule = new WeightedQuickUnionUF(N*N+2);
+		UFMPercol = new WeightedQuickUnionUF(N*N+2);
+		UFMFull = new WeightedQuickUnionUF(N*N+2);
 		SOURCE_SITE_INDEX = N*N;
 		SINK_SITE_INDEX = N*N + 1;
 	}
@@ -80,8 +83,11 @@ public class Percolation {
 		
 		// union with source or sink (auxiliary) site
 		int idx = this.xyTo1D(row, col);
-		if (1 == row) this.UFModule.union(SOURCE_SITE_INDEX, idx);
-		if (N == row) this.UFModule.union(idx, SINK_SITE_INDEX);
+		if (1 == row) {
+			this.UFMPercol.union(SOURCE_SITE_INDEX, idx);
+			this.UFMFull.union(SOURCE_SITE_INDEX, idx);
+		}
+		if (N == row) this.UFMPercol.union(idx, SINK_SITE_INDEX);
 	}
 	
 	public boolean isOpen(int row, int col) {
@@ -105,7 +111,7 @@ public class Percolation {
 		 * @return boolean  true: target site is full / false: not full
 		 */
 		checkIndex(row, col);
-		return UFModule.connected(SOURCE_SITE_INDEX, xyTo1D(row, col));
+		return UFMFull.connected(SOURCE_SITE_INDEX, xyTo1D(row, col));
 	}
 	
 	public int numberOfOpenSites() {
@@ -119,7 +125,7 @@ public class Percolation {
 	
 	public boolean percolates() {
 		// does the system percolate?
-		return UFModule.connected(SOURCE_SITE_INDEX, SINK_SITE_INDEX);
+		return UFMPercol.connected(SOURCE_SITE_INDEX, SINK_SITE_INDEX);
 	}
 	
 	//--------------------------------------------------------
@@ -162,7 +168,10 @@ public class Percolation {
 		 * @param   col2   column index of the second site
 		 * @return  none
 		 */
-		this.UFModule.union(xyTo1D(row1, col1), xyTo1D(row2, col2));
+		int idx1 = xyTo1D(row1, col1);
+		int idx2 = xyTo1D(row2, col2);
+		this.UFMPercol.union(idx1, idx2);
+		this.UFMFull.union(idx1, idx2);
 	}
 	
 	
