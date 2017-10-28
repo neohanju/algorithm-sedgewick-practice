@@ -146,9 +146,9 @@ public class Percolation {
 		 * @return  int   1D array index
 		 */
 		if (row < 1 || row > N) {
-			throw new IndexOutOfBoundsException("row index out of bounds");			
+			throw new IllegalArgumentException("row index out of bounds");			
 		} else if (col < 1 || col > N) {
-			throw new IndexOutOfBoundsException("col index out of bounds");
+			throw new IllegalArgumentException("col index out of bounds");
 		}
 	} 
 	

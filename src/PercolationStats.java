@@ -12,6 +12,9 @@ public class PercolationStats {
 	
 	private double[] pcThresholds;  // to record thresholds
 	private int T;  // number of experiments (i.e. # of trials)
+	private double mean_ = 0.0;  // mean of thresholds
+	private double stddev_ = Double.NaN;  // std. dev of thresholds
+	private final double CONFIDENCE_95 = 1.96;  // coef for confidence interval
 	
 	public PercolationStats(int n, int trials) {
 		/**
@@ -27,7 +30,7 @@ public class PercolationStats {
 			throw new IllegalArgumentException("too small number of trials");
 		
 		T = trials;
-		pcThresholds = new double [T];
+		this.pcThresholds = new double [T];
 		double numSites = n*n;
 		for (int i = 0; i < T; i++) {			
 			Percolation curPc = new Percolation(n);			
@@ -36,39 +39,40 @@ public class PercolationStats {
 				int col = StdRandom.uniform(n) + 1;
 				curPc.open(row, col);
 			}
-			pcThresholds[i] = curPc.numberOfOpenSites() / numSites;
+			this.pcThresholds[i] = curPc.numberOfOpenSites() / numSites;
 		}
+		
+		this.mean_ = StdStats.mean(this.pcThresholds);
+		if (T > 1)
+			this.stddev_ = StdStats.stddev(pcThresholds); 
 	}
 	
 	public double mean() {
 		/**
 		 * @return sample mean of percolation threshold
 		 */
-		return StdStats.mean(pcThresholds);
+		return this.mean_;
 	}
 	
 	public double stddev() {
 		/**
 		 * @return   double   sample standard deviation of percolation threshold
 		 */
-		if (T > 1)
-			return StdStats.stddev(pcThresholds);
-		else
-			return Double.NaN;
+		return this.stddev_;
 	}
 	
 	public double confidenceLo() {
 		/**
 		 * @return   double   low end point of 95% confidence intervals
 		 */
-		return this.mean() - 1.96 * this.stddev() / Math.sqrt(T);
+		return this.mean_ - CONFIDENCE_95 * this.stddev_ / Math.sqrt(T);
 	}
 	
 	public double confidenceHi() {
 		/**
 		 * @return   double   high end point of 95% confidence interval
 		 */
-		return this.mean() + 1.96 * this.stddev() / Math.sqrt(T);
+		return this.mean_ + CONFIDENCE_95 * this.stddev_ / Math.sqrt(T);
 	}
 
 	public static void main(String[] args) {
